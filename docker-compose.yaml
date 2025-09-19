@@ -1,5 +1,4 @@
 version: '3.9'
-
 services:
   lawsuit-metadata-api:
     container_name: lawsuit-metadata-api
@@ -7,13 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    env_file:
-      - .env
     command: node dist/main
     expose:
-      - '8282' # porta interna exposta para o Traefik
+      - '8282'
     ports:
-      - '8282:8282' # opcional: só se você quiser acessar diretamente sem Traefik
+      - '8282:8282'
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
