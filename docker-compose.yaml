@@ -18,10 +18,10 @@ services:
       - traefik-net
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.analisesapi.rule=Host(`metadata.api.analisesprosolutti.com`)'
-      - 'traefik.http.routers.analisesapi.entrypoints=websecure'
-      - 'traefik.http.routers.analisesapi.tls.certresolver=mytlschallenge'
-      - 'traefik.http.services.analisesapi.loadbalancer.server.port=8282'
+      - 'traefik.http.routers.metadataapi.rule=Host(`metadata.api.analisesprosolutti.com`)'
+      - 'traefik.http.routers.metadataapi.entrypoints=websecure'
+      - 'traefik.http.routers.metadataapi.tls.certresolver=mytlschallenge'
+      - 'traefik.http.services.metadataapi.loadbalancer.server.port=8282'
     expose:
       - '8282'
 networks:
