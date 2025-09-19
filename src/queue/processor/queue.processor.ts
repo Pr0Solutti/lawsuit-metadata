@@ -20,7 +20,7 @@ export class QueueProcessor {
     const start = ontem.startOf('day').toISOString();
     const end = ontem.endOf('day').toISOString();
 
-    const trts = [1];
+    const trts = [2, 15];
     this.logger.log(`🕒 Agendando consulta de ${start} até ${end}`);
 
     for (const trt of trts) {
