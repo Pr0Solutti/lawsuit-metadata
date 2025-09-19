@@ -1,5 +1,5 @@
 # Step 1: Base image with Node.js
-FROM node:18-alpine
+FROM node:18-bullseye
 
 # Step 2: Set working directory
 WORKDIR /usr/src/app
