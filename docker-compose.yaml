@@ -1,19 +1,17 @@
 version: '3.9'
 services:
   lawsuit-metadata-api:
-    container_name: lawsuit-metadata-api
     build:
       context: .
       dockerfile: Dockerfile
-    restart: always
+    container_name: lawsuit-metadata-api
+    environment:
+      - NODE_ENV=production
+      - PORT=8282
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     command: node dist/main
-    expose:
-      - '8282'
-    ports:
-      - '8282:8282'
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
+    restart: always
     networks:
       - traefik-net
     labels:
@@ -22,7 +20,8 @@ services:
       - 'traefik.http.routers.analisesapi.entrypoints=websecure'
       - 'traefik.http.routers.analisesapi.tls.certresolver=mytlschallenge'
       - 'traefik.http.services.analisesapi.loadbalancer.server.port=8282'
-
+    expose:
+      - '8282'
 networks:
   traefik-net:
     external: true
