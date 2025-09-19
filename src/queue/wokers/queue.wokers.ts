@@ -16,28 +16,35 @@ export class QueueWorker extends WorkerHost {
   ) {
     super();
   }
-  async process(job?: Job<{ tribunal?: string }>) {
-    this.logger.log(`📄 Consultando processo`);
-    let pagination: any[] | null = []; // inicia vazio
-    let count = 0;
-    while (pagination) {
-      count++;
-      console.log(`🚀 Loop ${count}`);
+  async process(
+    job?: Job<{ tribunal?: string; start?: string; end?: string }>,
+  ) {
+    this.logger.log(
+      `📄 Consultando processos de ${job?.data.start} até ${job?.data.end}`,
+    );
 
-      const delayMs = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000; // 1 a 3s
-      this.logger.debug(`⏱ Delay de ${delayMs}ms antes de dar inicio`);
+    let pagination: any[] | null = [];
+    let count = 0;
+
+    while (pagination !== null) {
+      count++;
+      this.logger.debug(`🚀 Loop ${count}`);
+
+      const delayMs = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
+      await new Promise((r) => setTimeout(r, delayMs));
+
       const response = await axios.post<IDATAJUD>(
-        `${process.env.BASE_URL_DATAJUD}/api_publica_trt1/_search`,
+        `${process.env.BASE_URL_DATAJUD}/api_publica_${job?.data.tribunal}/_search`,
         {
-          size: 10,
+          size: 100,
           query: {
             bool: {
               must: [
                 {
                   range: {
                     dataAjuizamento: {
-                      gte: '2025-01-22T00:00:00.000Z',
-                      lte: '2025-01-22T23:59:59.999Z',
+                      gte: job?.data.start,
+                      lte: job?.data.end,
                     },
                   },
                 },
@@ -49,30 +56,36 @@ export class QueueWorker extends WorkerHost {
         },
         { headers: { Authorization: process.env.TOKEN_DATAJUD } },
       );
-      const data: Processo[] = response.data.hits.hits;
-      const listProcess = data.map((item) => {
-        return {
-          numero: this.formatCNJ(item._source.numeroProcesso),
-          classe: item._source.classe.nome,
-          tribunal: item._source.tribunal,
-          dataAjuizamento: item._source.dataAjuizamento,
-          sigilo: item._source.nivelSigilo,
-          assuntos: item._source.assuntos.map((assunto) => assunto.nome),
-          orgaojulgador: item._source.orgaoJulgador.nome,
-        };
-      });
-      await this.metadataModel.create(listProcess);
-      // console.log('listProcess', listProcess);
 
-      if (data.length !== 0) {
-        pagination = null; // encerra loop
+      const data: Processo[] = response.data.hits.hits;
+      if (!data.length) {
+        pagination = null;
         break;
       }
 
-      // pega o último sort para próxima paginação
+      const listProcess = data.map((item) => ({
+        numero: this.formatCNJ(item._source.numeroProcesso),
+        classe: item._source.classe.nome,
+        tribunal: item._source.tribunal,
+        dataAjuizamento: item._source.dataAjuizamento,
+        sigilo: item._source.nivelSigilo,
+        assuntos: item._source.assuntos.map((assunto) => assunto.nome),
+        orgaojulgador: item._source.orgaoJulgador.nome,
+      }));
+
+      const bulkOps = listProcess.map((processo) => ({
+        updateOne: {
+          filter: { numero: processo.numero },
+          update: { $set: processo },
+          upsert: true,
+        },
+      }));
+      await this.metadataModel.bulkWrite(bulkOps);
+
       pagination = data.at(-1)?.sort || null;
     }
   }
+
   formatCNJ(numero: string): string {
     // garantir que só tenha dígitos
     numero = numero.replace(/\D/g, '');

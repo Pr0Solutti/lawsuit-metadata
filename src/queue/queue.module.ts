@@ -5,6 +5,7 @@ import { QueueProcessor } from './processor/queue.processor';
 import { QueueController } from './queue.controller';
 import { Lawsuit, LawsuitSchema } from './schema/metadata.shcmea';
 import { QueueWorker } from './wokers/queue.wokers';
+import { HistoryService } from './services/history.service';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { QueueWorker } from './wokers/queue.wokers';
     ]),
   ],
   controllers: [QueueController],
-  providers: [QueueWorker, QueueProcessor],
+  providers: [QueueWorker, QueueProcessor, HistoryService],
 })
 export class QueueModule {}

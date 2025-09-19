@@ -30,6 +30,7 @@
     "@nestjs/schedule": "^6.0.1",
     "axios": "^1.12.2",
     "bull": "^4.16.5",
+    "dayjs": "^1.11.18",
     "ioredis": "^5.7.0",
     "mongoose": "^8.18.1",
     "reflect-metadata": "^0.2.2",
