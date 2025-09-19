@@ -26,7 +26,8 @@ jobs:
         run: |
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p 22100 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ${{ secrets.SSH_APP_PATH }}
-            docker rm -f lawsuit-metadata-api || true
+            echo "Derrubando containers antigos..."
+            docker compose down || true
             echo "Subindo containers com Docker Compose..."
-            docker compose up -d --build lawsuit-metadata-api
+            docker compose up -d --build --force-recreate --remove-orphans lawsuit-metadata-api
           EOF
