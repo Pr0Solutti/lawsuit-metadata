@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  lawsuit-metadata-api:
+    container_name: lawsuit-metadata-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    command: node dist/main
+    expose:
+      - '8282' # porta interna exposta para o Traefik
+    ports:
+      - '8282:8282' # opcional: só se você quiser acessar diretamente sem Traefik
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.analisesapi.rule=Host(`metadata.api.analisesprosolutti.com`)'
+      - 'traefik.http.routers.analisesapi.entrypoints=websecure'
+      - 'traefik.http.routers.analisesapi.tls.certresolver=mytlschallenge'
+      - 'traefik.http.services.analisesapi.loadbalancer.server.port=8282'
+
+networks:
+  traefik-net:
+    external: true

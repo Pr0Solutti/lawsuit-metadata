@@ -1,7 +1,6 @@
 // pje.service.ts
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { Queue } from 'bullmq';
 
 @Injectable()
@@ -31,7 +30,5 @@ export class QueueProcessor {
         },
       );
     }
-
-    // return { status: 'enfileirado', numero, origem };
   }
 }
