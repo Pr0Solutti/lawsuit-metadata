@@ -29,6 +29,9 @@ export class QueueWorker extends WorkerHost {
     while (pagination !== null) {
       count++;
       this.logger.debug(`🚀 Loop ${count}`);
+      this.logger.debug(
+        `Consultando de ${job?.data.start} até ${job?.data.end}`,
+      );
 
       const delayMs = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
       await new Promise((r) => setTimeout(r, delayMs));
