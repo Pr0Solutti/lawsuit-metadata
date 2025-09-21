@@ -9,7 +9,7 @@ export class HistoryService {
     @InjectQueue('lawsuit-database') private readonly pjeQueue: Queue,
   ) {}
   async execute(tribunal: string) {
-    const inicio = dayjs('2023-01-01');
+    const inicio = dayjs('2025-01-01');
     const fim = dayjs();
     let cursor = inicio;
     let totalJobs = 0;
