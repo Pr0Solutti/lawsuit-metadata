@@ -20,7 +20,7 @@ export class QueueWorker extends WorkerHost {
     job?: Job<{ tribunal?: string; start?: string; end?: string }>,
   ) {
     this.logger.log(
-      `📄 Consultando processos de ${job?.data.start} até ${job?.data.end}`,
+      `📄 Consultando processos no tribunal ${job?.data.tribunal} de ${job?.data.start} até ${job?.data.end}`,
     );
 
     let pagination: any[] | null = [];
@@ -32,60 +32,64 @@ export class QueueWorker extends WorkerHost {
       this.logger.debug(
         `Consultando de ${job?.data.start} até ${job?.data.end}`,
       );
+      try {
+        const delayMs = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
+        await new Promise((r) => setTimeout(r, delayMs));
 
-      const delayMs = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
-      await new Promise((r) => setTimeout(r, delayMs));
-
-      const response = await axios.post<IDATAJUD>(
-        `${process.env.BASE_URL_DATAJUD}/api_publica_${job?.data.tribunal}/_search`,
-        {
-          size: 100,
-          query: {
-            bool: {
-              must: [
-                {
-                  range: {
-                    dataAjuizamento: {
-                      gte: job?.data.start,
-                      lte: job?.data.end,
+        const response = await axios.post<IDATAJUD>(
+          `${process.env.BASE_URL_DATAJUD}/api_publica_${job?.data.tribunal}/_search`,
+          {
+            size: 100,
+            query: {
+              bool: {
+                must: [
+                  {
+                    range: {
+                      dataAjuizamento: {
+                        gte: job?.data.start,
+                        lte: job?.data.end,
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
+            sort: [{ dataAjuizamento: { order: 'asc' } }],
+            ...(pagination.length > 0 && { search_after: pagination }),
           },
-          sort: [{ dataAjuizamento: { order: 'asc' } }],
-          ...(pagination.length > 0 && { search_after: pagination }),
-        },
-        { headers: { Authorization: process.env.TOKEN_DATAJUD } },
-      );
+          { headers: { Authorization: process.env.TOKEN_DATAJUD } },
+        );
 
-      const data: Processo[] = response.data.hits.hits;
-      if (!data.length) {
+        const data: Processo[] = response.data.hits.hits;
+        if (!data.length) {
+          pagination = null;
+          break;
+        }
+
+        const listProcess = data.map((item) => ({
+          numero: this.formatCNJ(item._source.numeroProcesso),
+          classe: item._source.classe.nome,
+          tribunal: item._source.tribunal,
+          dataAjuizamento: item._source.dataAjuizamento,
+          sigilo: item._source.nivelSigilo,
+          assuntos: item._source.assuntos.map((assunto) => assunto.nome),
+          orgaojulgador: item._source.orgaoJulgador.nome,
+        }));
+
+        const bulkOps = listProcess.map((processo) => ({
+          updateOne: {
+            filter: { numero: processo.numero },
+            update: { $set: processo },
+            upsert: true,
+          },
+        }));
+        await this.metadataModel.bulkWrite(bulkOps);
+
+        pagination = data.at(-1)?.sort || null;
+      } catch (error) {
+        this.logger.error(`Erro na consulta: ${error}`);
         pagination = null;
-        break;
       }
-
-      const listProcess = data.map((item) => ({
-        numero: this.formatCNJ(item._source.numeroProcesso),
-        classe: item._source.classe.nome,
-        tribunal: item._source.tribunal,
-        dataAjuizamento: item._source.dataAjuizamento,
-        sigilo: item._source.nivelSigilo,
-        assuntos: item._source.assuntos.map((assunto) => assunto.nome),
-        orgaojulgador: item._source.orgaoJulgador.nome,
-      }));
-
-      const bulkOps = listProcess.map((processo) => ({
-        updateOne: {
-          filter: { numero: processo.numero },
-          update: { $set: processo },
-          upsert: true,
-        },
-      }));
-      await this.metadataModel.bulkWrite(bulkOps);
-
-      pagination = data.at(-1)?.sort || null;
     }
   }
 
