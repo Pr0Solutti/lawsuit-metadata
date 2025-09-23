@@ -6,9 +6,13 @@ import { QueueController } from './queue.controller';
 import { Lawsuit, LawsuitSchema } from './schema/metadata.shcmea';
 import { QueueWorker } from './wokers/queue.wokers';
 import { HistoryService } from './services/history.service';
+import { ListService } from './services/list.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Metadata } from './entites/metadate.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Metadata]),
     BullModule.registerQueue({ name: 'lawsuit-database' }),
     MongooseModule.forFeature([
       {
@@ -18,6 +22,6 @@ import { HistoryService } from './services/history.service';
     ]),
   ],
   controllers: [QueueController],
-  providers: [QueueWorker, QueueProcessor, HistoryService],
+  providers: [QueueWorker, QueueProcessor, HistoryService, ListService],
 })
 export class QueueModule {}

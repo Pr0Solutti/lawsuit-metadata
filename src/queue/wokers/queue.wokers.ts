@@ -6,6 +6,9 @@ import { Job } from 'bullmq';
 import { Model } from 'mongoose';
 import { IDATAJUD, Processo } from '../interfaces';
 import { Lawsuit } from '../schema/metadata.shcmea';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Metadata } from '../entites/metadate.entity';
+import { Repository } from 'typeorm';
 
 @Processor('lawsuit-database', { concurrency: 1, lockDuration: 600000 }) // paralelo
 export class QueueWorker extends WorkerHost {
@@ -13,6 +16,8 @@ export class QueueWorker extends WorkerHost {
   constructor(
     @InjectModel(Lawsuit.name)
     private readonly metadataModel: Model<Lawsuit>,
+    @InjectRepository(Metadata)
+    private readonly metadataRepo: Repository<Metadata>,
   ) {
     super();
   }
@@ -39,7 +44,7 @@ export class QueueWorker extends WorkerHost {
         const response = await axios.post<IDATAJUD>(
           `${process.env.BASE_URL_DATAJUD}/api_publica_${job?.data.tribunal}/_search`,
           {
-            size: 100,
+            size: 5000,
             query: {
               bool: {
                 must: [
@@ -73,24 +78,23 @@ export class QueueWorker extends WorkerHost {
           dataAjuizamento: item._source.dataAjuizamento,
           sigilo: item._source.nivelSigilo,
           assuntos: item._source.assuntos.map((assunto) => assunto.nome),
-          orgaojulgador: item._source.orgaoJulgador.nome,
+          orgaoJulgador: item._source.orgaoJulgador?.nome || undefined,
         }));
 
-        const bulkOps = listProcess.map((processo) => ({
-          updateOne: {
-            filter: { numero: processo.numero },
-            update: { $set: processo },
-            upsert: true,
-          },
-        }));
-        await this.metadataModel.bulkWrite(bulkOps);
+        // Salvar ou atualizar processos usando TypeORM (SQL)
+        if (listProcess.length > 0) {
+          await this.metadataRepo.upsert(listProcess, ['numero']);
+        }
 
+        // The line below was commented out, causing the infinite loop.
+        // It must be uncommented to update the pagination and prevent the loop.
         pagination = data.at(-1)?.sort || null;
       } catch (error) {
         this.logger.error(`Erro na consulta: ${error}`);
         pagination = null;
       }
     }
+    this.logger.debug('Consulta finalizada.');
   }
 
   formatCNJ(numero: string): string {

@@ -1,0 +1,19 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "prosolutti.ip.odhserver.com",
+      "port": 10022,
+      "driver": "MySQL",
+      "name": "Trabalhista",
+      "username": "ocs-user",
+      "database": "trabalhista",
+      "password": "wL$%RGwa739M6X2LkvuF"
+    }
+  ]
+}

@@ -28,13 +28,17 @@
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.0.1",
+    "@nestjs/typeorm": "^11.0.0",
     "axios": "^1.12.2",
     "bull": "^4.16.5",
     "dayjs": "^1.11.18",
     "ioredis": "^5.7.0",
     "mongoose": "^8.18.1",
+    "mysql2": "^3.15.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "tunnel-ssh": "^5.2.0",
+    "typeorm": "^0.3.27"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
