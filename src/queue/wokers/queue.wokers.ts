@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Metadata } from '../entites/metadate.entity';
 import { Repository } from 'typeorm';
 
-@Processor('lawsuit-database', { concurrency: 1, lockDuration: 600000 }) // paralelo
+@Processor('lawsuit-database', { lockDuration: 600000 }) // paralelo
 export class QueueWorker extends WorkerHost {
   private readonly logger = new Logger(QueueWorker.name);
   constructor(
