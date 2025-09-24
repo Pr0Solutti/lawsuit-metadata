@@ -12,10 +12,10 @@ import { QueueModule } from './queue/queue.module';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '127.0.0.1',
+      host: '209.14.142.179',
       port: 3306,
       username: 'root',
-      password: 'B"*5-ENu.Wnp(jU!K(a', // sem senha
+      password: 'B"*5-ENu.Wnp(jU!K(a',
       database: 'trabalhista',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
