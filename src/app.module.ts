@@ -15,10 +15,10 @@ import { QueueModule } from './queue/queue.module';
       host: '127.0.0.1',
       port: 3306,
       username: 'root',
-      password: '', // sem senha
+      password: 'B"*5-ENu.Wnp(jU!K(a', // sem senha
       database: 'trabalhista',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: false,
       logging: true,
     }),
     QueueModule,
