@@ -1,7 +1,7 @@
 // pje.service.ts
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-// import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Queue } from 'bullmq';
 import * as dayjs from 'dayjs';
 dayjs().format();
@@ -14,7 +14,7 @@ export class QueueProcessor {
     @InjectQueue('lawsuit-database') private readonly pjeQueue: Queue,
   ) {}
 
-  // @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async execute() {
     const ontem = dayjs().subtract(1, 'day');
     const start = ontem.startOf('day').toISOString();
