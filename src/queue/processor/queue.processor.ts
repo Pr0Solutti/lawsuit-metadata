@@ -1,7 +1,7 @@
 // pje.service.ts
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+// import { Cron, CronExpression } from '@nestjs/schedule';
 import { Queue } from 'bullmq';
 import * as dayjs from 'dayjs';
 dayjs().format();
