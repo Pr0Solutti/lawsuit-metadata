@@ -1,9 +1,9 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LawsuitModule } from './module/lawsuits/lawsuit.module';
 import { QueueModule } from './queue/queue.module';
 @Module({
   imports: [
@@ -28,9 +28,9 @@ import { QueueModule } from './queue/queue.module';
         port: Number(process.env.REDIS_PORT),
       },
     }),
+    LawsuitModule,
     BullModule.registerQueue({ name: 'lawsuit-database' }),
     ScheduleModule.forRoot(),
-    MongooseModule.forRoot(process.env.DATABASE_URL as string),
   ],
   controllers: [],
   providers: [],

@@ -1,21 +1,16 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Job } from 'bullmq';
-import { Model } from 'mongoose';
-import { IDATAJUD, Processo } from '../interfaces';
-import { Lawsuit } from '../schema/metadata.shcmea';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Metadata } from '../entites/metadate.entity';
 import { Repository } from 'typeorm';
+import { Metadata } from '../entites/metadate.entity';
+import { IDATAJUD, Processo } from '../interfaces';
 
 @Processor('lawsuit-database', { lockDuration: 600000 }) // paralelo
 export class QueueWorker extends WorkerHost {
   private readonly logger = new Logger(QueueWorker.name);
   constructor(
-    @InjectModel(Lawsuit.name)
-    private readonly metadataModel: Model<Lawsuit>,
     @InjectRepository(Metadata)
     private readonly metadataRepo: Repository<Metadata>,
   ) {
